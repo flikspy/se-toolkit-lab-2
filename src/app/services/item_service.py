@@ -195,25 +195,10 @@ class FoundItem:
 def get_item_by_id_dfs_iterative(
     courses: List[Course], item_id: str, order: Order
 ) -> Optional[FoundItem]:
-    """Find an item by its id.
+    """Find an item by its id using iterative DFS."""
 
-    Searches through all courses and their nested items.
-
-    Uses depth-first search (DFS) in a specific order.
-
-    See:
-    - [Depth-first search](https://en.wikipedia.org/wiki/Tree_traversal#Depth-first_search)
-    - [Depth-first search example](https://en.wikipedia.org/wiki/Depth-first_search#Example)
-
-    Args:
-        courses: a list of course info objects
-        item_id: The unique identifier of the item to find.
-        order: order in which to search
-
-    Returns:
-        The FoundItem if found, None otherwise.
-    """
     counter = 0
+
     match order:
         case PreOrder():
             for course in courses:
@@ -228,18 +213,36 @@ def get_item_by_id_dfs_iterative(
 
                     for task in lab.tasks:
                         counter += 1
-                        if lab.id == item_id:
+                        if task.id == item_id:   #исправлено
                             return FoundItem(task, counter)
 
                         for step in task.steps:
                             counter += 1
                             if step.id == item_id:
                                 return FoundItem(step, counter)
-        case PostOrder():
-            # TODO implement
-            pass
-    return None
 
+        case PostOrder():
+            for course in courses:
+                for lab in course.labs:
+                    for task in lab.tasks:
+                        for step in task.steps:
+                            counter += 1
+                            if step.id == item_id:
+                                return FoundItem(step, counter)
+
+                        counter += 1
+                        if task.id == item_id:
+                            return FoundItem(task, counter)
+
+                    counter += 1
+                    if lab.id == item_id:
+                        return FoundItem(lab, counter)
+
+                counter += 1
+                if course.id == item_id:
+                    return FoundItem(course, counter)
+
+    return None
 
 # ===
 #
